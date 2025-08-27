@@ -12,3 +12,5 @@ tomra jei email provide korso sheta diye dhukba
 - database files are at the path: `C:\xampp\mysql\data\*`
 - but to export it, open the database in XAMPP and use "Export" to export as a .sql file (or, ".sql.zip")
 - in the new location (in a different computer) create a new database, and use "Import" and select the .sql file or the .sql.zip to import the database files.
+
+# ornob dekhte chae

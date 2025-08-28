@@ -1,0 +1,15 @@
+# DB Tables
+- Visitor --> V_ID(auto), V_Name(optional)
+- AI Assist --> **Model, Context, Reference** [future implementation, skip for now]
+- Donor --> D_ID(pk), D_Phone, D_Payment, D_Email, D_Address, D_Name, D_Blood
+- Consumer --> C_ID(pk), C_name, C_Phone, C_Email, C_Address,** C_Blood**
+- Service --> C_ID(fk), Service, Bounty, Deadline
+- Admin --> A_ID(pk), A_Name, A_Phone, A_Email, A_Address, A_Blood
+- Offer --> P_ID(fk), Offer, Location, Status
+- Donations --> D_ID(fk), Amount
+- Service Provider --> P_ID(pk), P_Name, P_Phone, P_Email, P_Address, P_Record, P_Rank, **P_Rating**,  P_Blood
+- Feedback --> **Token**, User_Type, User-ID, Feedback, Urgency(Visitor=less important, User=important)
+
+######
+
+- set bigint instaed of int, otherwise insertion shows size error

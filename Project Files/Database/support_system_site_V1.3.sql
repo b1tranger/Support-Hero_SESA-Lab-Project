@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 28, 2025 at 11:34 AM
+-- Generation Time: Sep 06, 2025 at 06:19 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `supporthero`
+-- Database: `projectdb`
 --
 
 -- --------------------------------------------------------
@@ -28,7 +28,7 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `admin` (
-  `A_ID` bigint(11) NOT NULL,
+  `Admin_ID` bigint(11) NOT NULL,
   `A_Name` varchar(100) DEFAULT NULL,
   `A_Phone` varchar(20) DEFAULT NULL,
   `A_Email` varchar(100) DEFAULT NULL,
@@ -43,7 +43,7 @@ CREATE TABLE `admin` (
 --
 
 CREATE TABLE `consumer` (
-  `C_ID` bigint(11) NOT NULL,
+  `Consumer_ID` bigint(11) NOT NULL,
   `C_Name` varchar(100) DEFAULT NULL,
   `C_Phone` varchar(20) DEFAULT NULL,
   `C_Email` varchar(100) DEFAULT NULL,
@@ -58,7 +58,7 @@ CREATE TABLE `consumer` (
 --
 
 CREATE TABLE `donations` (
-  `D_ID` bigint(11) DEFAULT NULL,
+  `Donor_ID` bigint(11) DEFAULT NULL,
   `Amount` bigint(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -69,7 +69,7 @@ CREATE TABLE `donations` (
 --
 
 CREATE TABLE `donor` (
-  `D_ID` bigint(11) NOT NULL,
+  `Donor_ID` bigint(11) NOT NULL,
   `D_Name` varchar(100) DEFAULT NULL,
   `D_Phone` varchar(20) DEFAULT NULL,
   `D_Email` varchar(100) DEFAULT NULL,
@@ -85,7 +85,7 @@ CREATE TABLE `donor` (
 --
 
 CREATE TABLE `feedback` (
-  `Token` varchar(50) NOT NULL,
+  `Feedback_ID` varchar(50) NOT NULL,
   `User_Type` varchar(50) NOT NULL,
   `User_ID` bigint(11) DEFAULT NULL,
   `Feedback` text NOT NULL,
@@ -99,10 +99,11 @@ CREATE TABLE `feedback` (
 --
 
 CREATE TABLE `offers` (
-  `P_ID` bigint(11) DEFAULT NULL,
+  `Provider_ID` bigint(11) DEFAULT NULL,
   `offer` varchar(200) DEFAULT NULL,
   `Location` varchar(200) DEFAULT NULL,
-  `Status` enum('Pending','Accepted','Completed','Rejected') DEFAULT 'Pending'
+  `Status` enum('Pending','Accepted','Completed','Rejected') DEFAULT 'Pending',
+  `Offer_ID` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -112,13 +113,9 @@ CREATE TABLE `offers` (
 --
 
 CREATE TABLE `service` (
-  `Request_ID` bigint(11) NOT NULL,
-  `C_ID` bigint(11) NOT NULL,
-  `P_ID` bigint(11) DEFAULT NULL,
-  `A_ID` bigint(11) DEFAULT NULL,
+  `Service_ID` bigint(11) NOT NULL,
   `Service_Type` enum('Waste','Courier','Guard','Cleaning','Quick Delivery') NOT NULL,
-  `Status` enum('Pending','Accepted','Completed','Rejected') DEFAULT 'Pending',
-  `Is_Bounty` enum('Yes','No') DEFAULT 'No',
+  `Bounty` enum('Yes','No') DEFAULT 'No',
   `Deadline` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -129,7 +126,7 @@ CREATE TABLE `service` (
 --
 
 CREATE TABLE `service_provider` (
-  `P_ID` bigint(11) NOT NULL,
+  `Provider_ID` bigint(11) NOT NULL,
   `P_Name` varchar(100) DEFAULT NULL,
   `P_Phone` varchar(20) DEFAULT NULL,
   `P_Email` varchar(100) DEFAULT NULL,
@@ -146,7 +143,7 @@ CREATE TABLE `service_provider` (
 --
 
 CREATE TABLE `visitor` (
-  `V_ID` bigint(10) NOT NULL,
+  `Visitor_ID` bigint(10) NOT NULL,
   `V_Name` varchar(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -158,58 +155,56 @@ CREATE TABLE `visitor` (
 -- Indexes for table `admin`
 --
 ALTER TABLE `admin`
-  ADD PRIMARY KEY (`A_ID`);
+  ADD PRIMARY KEY (`Admin_ID`);
 
 --
 -- Indexes for table `consumer`
 --
 ALTER TABLE `consumer`
-  ADD PRIMARY KEY (`C_ID`);
+  ADD PRIMARY KEY (`Consumer_ID`);
 
 --
 -- Indexes for table `donations`
 --
 ALTER TABLE `donations`
-  ADD KEY `D_ID` (`D_ID`);
+  ADD KEY `D_ID` (`Donor_ID`);
 
 --
 -- Indexes for table `donor`
 --
 ALTER TABLE `donor`
-  ADD PRIMARY KEY (`D_ID`);
+  ADD PRIMARY KEY (`Donor_ID`);
 
 --
 -- Indexes for table `feedback`
 --
 ALTER TABLE `feedback`
-  ADD PRIMARY KEY (`Token`);
+  ADD PRIMARY KEY (`Feedback_ID`);
 
 --
 -- Indexes for table `offers`
 --
 ALTER TABLE `offers`
-  ADD KEY `P_ID` (`P_ID`);
+  ADD PRIMARY KEY (`Offer_ID`),
+  ADD KEY `P_ID` (`Provider_ID`);
 
 --
 -- Indexes for table `service`
 --
 ALTER TABLE `service`
-  ADD PRIMARY KEY (`Request_ID`),
-  ADD KEY `C_ID` (`C_ID`),
-  ADD KEY `P_ID` (`P_ID`),
-  ADD KEY `A_ID` (`A_ID`);
+  ADD PRIMARY KEY (`Service_ID`);
 
 --
 -- Indexes for table `service_provider`
 --
 ALTER TABLE `service_provider`
-  ADD PRIMARY KEY (`P_ID`);
+  ADD PRIMARY KEY (`Provider_ID`);
 
 --
 -- Indexes for table `visitor`
 --
 ALTER TABLE `visitor`
-  ADD PRIMARY KEY (`V_ID`);
+  ADD PRIMARY KEY (`Visitor_ID`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -219,37 +214,43 @@ ALTER TABLE `visitor`
 -- AUTO_INCREMENT for table `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `A_ID` bigint(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `Admin_ID` bigint(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `consumer`
 --
 ALTER TABLE `consumer`
-  MODIFY `C_ID` bigint(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `Consumer_ID` bigint(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `donor`
 --
 ALTER TABLE `donor`
-  MODIFY `D_ID` bigint(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `Donor_ID` bigint(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `offers`
+--
+ALTER TABLE `offers`
+  MODIFY `Offer_ID` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `service`
 --
 ALTER TABLE `service`
-  MODIFY `Request_ID` bigint(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `Service_ID` bigint(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `service_provider`
 --
 ALTER TABLE `service_provider`
-  MODIFY `P_ID` bigint(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `Provider_ID` bigint(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `visitor`
 --
 ALTER TABLE `visitor`
-  MODIFY `V_ID` bigint(10) NOT NULL AUTO_INCREMENT;
+  MODIFY `Visitor_ID` bigint(10) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -259,21 +260,13 @@ ALTER TABLE `visitor`
 -- Constraints for table `donations`
 --
 ALTER TABLE `donations`
-  ADD CONSTRAINT `donations_ibfk_1` FOREIGN KEY (`D_ID`) REFERENCES `donor` (`D_ID`);
+  ADD CONSTRAINT `donations_ibfk_1` FOREIGN KEY (`Donor_ID`) REFERENCES `donor` (`Donor_ID`);
 
 --
 -- Constraints for table `offers`
 --
 ALTER TABLE `offers`
-  ADD CONSTRAINT `offers_ibfk_1` FOREIGN KEY (`P_ID`) REFERENCES `service_provider` (`P_ID`);
-
---
--- Constraints for table `service`
---
-ALTER TABLE `service`
-  ADD CONSTRAINT `service_ibfk_1` FOREIGN KEY (`C_ID`) REFERENCES `consumer` (`C_ID`),
-  ADD CONSTRAINT `service_ibfk_2` FOREIGN KEY (`P_ID`) REFERENCES `service_provider` (`P_ID`),
-  ADD CONSTRAINT `service_ibfk_3` FOREIGN KEY (`A_ID`) REFERENCES `admin` (`A_ID`);
+  ADD CONSTRAINT `offers_ibfk_1` FOREIGN KEY (`Provider_ID`) REFERENCES `service_provider` (`Provider_ID`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

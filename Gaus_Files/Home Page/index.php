@@ -11,6 +11,7 @@
     <!-- <link rel="stylesheet" type="text/css" href="index.css"> -->
     <link rel="stylesheet" type="text/css" href="../style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 </head>
 
 <body>
@@ -21,11 +22,16 @@
         <div class="desktop-nav">
             <div class="desktop-nav-card">
                 <ul>
-                    <li><a href="#about" title="About"><i class="fa-solid fa-circle-info" style="font-size: 1.8rem;"></i></a></li>
-                    <li><a href="#services" title="Services"><i class="fa-solid fa-list" style="font-size: 1.8rem;"></i></a></li>
-                    <li><a href="#account" title="Services"><i class="fa-solid fa-inbox" style="font-size: 1.8rem;"></i></a></li>
-                    <li><a href="#donation" title="Donation"><i class="fa-solid fa-hand-holding-medical"  style="font-size: 1.8rem;"></i></a></li>
-                    <li><a href="#contact" title="Contact"><i class="fa-solid fa-envelope"  style="font-size: 1.8rem;"></i></a></li>
+                    <li><a href="#about" title="About"><i class="fa-solid fa-circle-info"
+                                style="font-size: 1.8rem;"></i></a></li>
+                    <li><a href="#services" title="Services"><i class="fa-solid fa-list"
+                                style="font-size: 1.8rem;"></i></a></li>
+                    <li><a href="#account" title="Services"><i class="fa-solid fa-inbox"
+                                style="font-size: 1.8rem;"></i></a></li>
+                    <li><a href="#donation" title="Donation"><i class="fa-solid fa-hand-holding-medical"
+                                style="font-size: 1.8rem;"></i></a></li>
+                    <li><a href="#contact" title="Contact"><i class="fa-solid fa-envelope"
+                                style="font-size: 1.8rem;"></i></a></li>
                 </ul>
             </div>
         </div>
@@ -33,12 +39,17 @@
         <!-- Mobile Navigation -->
         <div class="mobile-nav">
             <ul>
-                    <li><a href="#about" title="About"><i class="fa-solid fa-circle-info" style="font-size: 1.8rem;"></i></a></li>
-                    <li><a href="#services" title="Services"><i class="fa-solid fa-list" style="font-size: 1.8rem;"></i></a></li>
-                    <li><a href="#account" title="Services"><i class="fa-solid fa-inbox" style="font-size: 1.8rem;"></i></a></li>
-                    <li><a href="#donation" title="Donation"><i class="fa-solid fa-hand-holding-medical"  style="font-size: 1.8rem;"></i></a></li>
-                    <li><a href="#contact" title="Contact"><i class="fa-solid fa-envelope"  style="font-size: 1.8rem;"></i></a></li>
-                </ul>
+                <li><a href="#about" title="About"><i class="fa-solid fa-circle-info"
+                            style="font-size: 1.8rem;"></i></a></li>
+                <li><a href="#services" title="Services"><i class="fa-solid fa-list" style="font-size: 1.8rem;"></i></a>
+                </li>
+                <li><a href="#account" title="Services"><i class="fa-solid fa-inbox" style="font-size: 1.8rem;"></i></a>
+                </li>
+                <li><a href="#donation" title="Donation"><i class="fa-solid fa-hand-holding-medical"
+                            style="font-size: 1.8rem;"></i></a></li>
+                <li><a href="#contact" title="Contact"><i class="fa-solid fa-envelope"
+                            style="font-size: 1.8rem;"></i></a></li>
+            </ul>
         </div>
     </nav>
 
@@ -125,39 +136,56 @@
         </section>
 
 
-        <!-- Section 6: Backend Demo -->
+        <!-- Section 6: Service List -->
         <section id="services" class="full-screen-section">
             <div class="section-content">
-                <h2>Admin & Backend Operations (Demo)</h2>
+                <h2>Services</h2>
+
+                <?php
+                include("../connection.php");
+
+                $sql = "SELECT * FROM service LIMIT 6"; 
+                // Getting 6 services
+                $result = mysqli_query($conn, $sql);
+                ?>
+
                 <div class="grid-3">
-                    <div class="card">
-                        <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2" />
-                            </svg></div>
-                        <h3>User Management</h3>
-                        <p>Admin panel to manage consumers, service providers, and visitor feedback.</p>
-                    </div>
-                    <div class="card">
-                        <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                            </svg></div>
-                        <h3>Service Management</h3>
-                        <p>Tools for admins to oversee service requests, bounties, and provider ranks.</p>
-                    </div>
-                    <div class="card">
-                        <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg></div>
-                        <h3>Financials</h3>
-                        <p>Manage direct compensations and the flow of donations through the system.</p>
-                    </div>
+
+                    <?php
+                    if (mysqli_num_rows($result) > 0) {
+                        // Loop through each service from the database
+                        while ($row = mysqli_fetch_assoc($result)) {
+
+                            // 2. Change 'service_name' and 'service_description'
+                            //    to your actual column names
+                            $service_name = htmlspecialchars($row['service_name']);
+                            $service_desc = htmlspecialchars($row['details']);
+
+                            // This is the HTML template for each service card
+                            echo '
+                        <div class="card">
+                            <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                </svg></div>
+                            <h3>' . $service_name . '</h3>
+                            <p>' . $service_desc . '</p>
+                        </div>
+                        ';
+                        }
+                    } else {
+                        // This message shows if the database table is empty
+                        echo '<p>No services are currently available.</p>';
+                    }
+                    ?>
+
                 </div>
+                <div style="margin-top: 2.5rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;">
+                    <a href="../Services/request_offer.php" class="btn btn-blue">Create a Service</a>
+                    <!-- <a href="../Services/offer.php" class="btn btn-green">Offer a Service</a> -->
+                </div>
+
             </div>
         </section>
 
@@ -168,12 +196,19 @@
                 <h2>Get involved</h2>
                 <div class="grid-3">
                     <div class="card">
-                        <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2" />
-                            </svg></div>
+                        <div class="card-icon">
+                            <!-- <img src="../icon/user-regular-full.svg" width="80px;" style="color: #0096FF;"> -->
+                            <i class="fa-regular fa-user" style="font-size:2.5rem;font-weight:bold;"></i>
+                        </div>
                         <!-- <h3>Consumer Account</h3> -->
+                        <a href="../Registration_Login/login.php" class="btn btn-blue">User Login</a>
+                        <p>As a consumer, you can request for services or accept an existing offer. They are our core
+                            users.</p>
+                        <p>Don&apos;t have an account? <a href="../Registration_Login/registration_form.php">Create
+                                Account?</a></p>
+                    </div>
+                    <!-- <div class="card">
+                        <div class="card-icon"><i class="fa-regular fa-user" style="font-size:2.5rem;font-weight:bold;"></i></div>
                         <a href="../Registration_Login/registration_form.php" class="btn btn-green">Register as a
                             Consumer</a>
                         <p>As a consumer, you can request for services or accept an existing offer. They are our core
@@ -181,18 +216,13 @@
                         <p>Already registered? Go to <a href="../Registration_Login/login.php">Login</a></p>
                     </div>
                     <div class="card">
-                        <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                            </svg></div>
-                        <!-- <h3>Provider Account</h3> -->
+                        <div class="card-icon"><i class="fa-regular fa-user" style="font-size:2.5rem;font-weight:bold;"></i></div>
                         <a href="../Registration_Login/registration_form.php" class="btn btn-blue">Register as a
                             Provider</a>
                         <p>As a provider, you can accept a request or create an offer for the consumers. They areour
                             main driving force.</p>
                         <p>Already registered? Go to <a href="../Registration_Login/login.php">Login</a></p>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </section>
@@ -206,7 +236,7 @@
                     available
                     to everyone, regardless of their ability to pay. Every contribution makes a difference.</p>
                 <p>Help us build a stronger, more connected community by making a contribution today.</p>
-                <a href="#payment-link" class="btn btn-blue" style="margin-top: 1.5rem;">Become a Donator</a>
+                <a href="#payment-link" class="btn btn-blue" style="margin-top: 1.5rem;">Become a Donor</a>
             </div>
         </section>
 

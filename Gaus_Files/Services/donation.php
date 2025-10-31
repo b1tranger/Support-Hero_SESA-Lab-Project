@@ -10,6 +10,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 
 // 2. GET USER DATA AND CURRENT BALANCE
 include("../connection.php");
+$user_id = $_SESSION['user_id'];
 $username = $_SESSION['username'];
 $user_type = $_SESSION['user_type'];
 $current_balance = 0.00;
@@ -35,11 +36,14 @@ if (isset($_POST['submit_donation'])) {
         // Corrected SQL query to increment balance
         $sql_update = "UPDATE account SET balance = balance + $donation_amount WHERE username = '$username' AND type = '$user_type'";
         $result_update = mysqli_query($conn, $sql_update);
+        $sqlTransaction = "Insert into transactions(user_id, amount, report) values('$user_id','$donation_amount','Added to Balance')";
 
         if ($result_update && mysqli_affected_rows($conn) > 0) {
             $flag = 2; // Success
             // Update current balance for display
             $current_balance = $current_balance + $donation_amount;
+            $transactionSQL = mysqli_query($conn, $sqlTransaction );
+
         } else {
             $flag = 1;
             $form_error = "An error occurred while updating your balance. Please try again.";

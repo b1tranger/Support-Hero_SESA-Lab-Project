@@ -1,6 +1,9 @@
 <!-- Home_Page(demo03) -->
 
 <?php
+
+include("../connection.php");
+
 session_start();
 
 // Check if the user is logged in and store the state in a variable
@@ -100,6 +103,8 @@ if ($is_logged_in) {
                 <div id="hero-buttons">
                     <?php if ($user_type == 'admin'): ?>
                         <a href="admin.php" class="btn btn-blue">Dashboard</a>
+                    <?php elseif ($user_type == 'consumer' || $user_type == 'provider'): ?>
+                        <a href="profile.php" class="btn btn-blue">Profile</a>
                     <?php else: ?>
                         <a href="#account" class="btn btn-blue">Join Us</a>
                     <?php endif; ?>
@@ -119,13 +124,6 @@ if ($is_logged_in) {
         </section>
 
         <!-- Section 2: About -->
-        <!-- <section id="about" class="full-screen-section" style="background-color: white;">
-            <div class="section-content">
-
-            </div>
-        </section> -->
-
-        <!-- Section 5: About -->
         <section id="about" class="full-screen-section" style="background-color: #f9fafb;">
             <div class="section-content">
                 <h2>About Our Mission</h2>
@@ -168,7 +166,7 @@ if ($is_logged_in) {
         </section>
 
 
-        <!-- Section 6: Service List -->
+        <!-- Section 3: Service List -->
         <section id="services" class="full-screen-section">
             <div class="section-content">
                 <h2>Services</h2>
@@ -242,7 +240,7 @@ if ($is_logged_in) {
         </section>
 
 
-        <!-- Section 3: Accounts -->
+        <!-- Section 4: Accounts -->
         <section id="account" class="full-screen-section" style="background-color: white;">
             <div class="section-content">
                 <h2>Get involved</h2>
@@ -262,7 +260,7 @@ if ($is_logged_in) {
         </section>
 
 
-        <!-- Section 4: Accounts -->
+        <!-- Section 5: Donations -->
         <section id="donation" class="full-screen-section" style="background-color: #f9fafb;">
             <div class="section-content">
                 <h2>Become a Donor !</h2>
@@ -282,6 +280,77 @@ if ($is_logged_in) {
         </section>
 
 
+        <!-- Section 6: Transactions -->
+        <section id="transactions" class="full-screen-section" style="background-color: #f9fafb;">
+            <div class="section-content">
+                <h2>Recent Transactions</h2>
+
+                <?php
+                // We assume $conn is still open from the previous section
+                // If not, you'd add: include("../connection.php");
+                
+                // New SQL query to get recent transactions and the service name
+                $sql_trans = "SELECT 
+                                t.transaction_id, 
+                                t.user_id,  
+                                t.amount, 
+                                t.report
+                            FROM 
+                                transactions t 
+                            
+                            ORDER BY 
+                                t.transaction_id DESC 
+                            LIMIT 5";
+
+                $result_trans = mysqli_query($conn, $sql_trans);
+                $receiver = 'System';
+                $date = 'random date';
+                ?>
+
+                <div class="service-list-container">
+
+                    <?php
+                    if (mysqli_num_rows($result_trans) > 0) {
+                        // Loop through each transaction from the database
+                        while ($row = mysqli_fetch_assoc($result_trans)) {
+
+                            // 1. Get all the transaction data
+                            $sender = htmlspecialchars($row['user_id']);
+                            // $receiver = htmlspecialchars($row['receiver_username']);
+                            $amount = htmlspecialchars($row['amount']);
+                            $report = htmlspecialchars($row['report']);
+                            // $date = htmlspecialchars(date("d M, Y, g:i a", strtotime($row['created_at']))); // Format the date and time
+                    
+                            // Check if service_name is NULL (e.g., general donation)
+                            // $service_name = $row['service_name'] ? htmlspecialchars($row['service_name']) : 'General Donation';
+                    
+
+                            // 2. This is the new HTML template for each transaction item
+                            echo '
+                        <div class="service-list-item">
+                        <div class="service-info" style="margin-right: 0;"> 
+                        <h3>' . $amount . ' BDT Transferred</h3>
+                                <p><strong>From:</strong> ' . $sender . ' | <strong>To:</strong> ' . $receiver . '</p>
+                                <p><strong>Summary:</strong> ' . $report. ' | <strong>Date:</strong> ' . $date . '</p>
+                            </div>
+                            
+                        </div>
+                        ';
+                        }
+                    } else {
+                        // This message shows if the transactions table is empty
+                        echo '<p style="padding: 2rem;">No recent transactions found.</p>';
+                    }
+                    ?>
+
+                </div>
+
+                <div style="margin-top: 2.5rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;">
+                    <a href="../Services/transactions.php" class="btn btn-green">See Full List</a>
+                </div>
+
+            </div>
+        </section>
 
         <!-- Section 7: Contact -->
         <section id="contact" class="full-screen-section">

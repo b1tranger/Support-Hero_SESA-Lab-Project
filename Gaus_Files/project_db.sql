@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 31, 2025 at 02:51 PM
+-- Generation Time: Oct 31, 2025 at 07:04 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -41,9 +41,9 @@ CREATE TABLE `account` (
 --
 
 INSERT INTO `account` (`email`, `password`, `username`, `user_id`, `type`, `balance`) VALUES
-('gsmurady123@gmail.com', '1234', 'Gaus', 6, 'provider', 800.00),
+('gsmurady123@gmail.com', '1234', 'Gaus', 6, 'provider', 1034.00),
 ('masud@gmail.com', '12345', 'Masud', 9, 'consumer', 0.00),
-('gaus.admin@gmail.com', 'admin1234', 'Gaus', 10, 'admin', 0.00),
+('gaus.admin@gmail.com', 'admin1234', 'Gaus', 10, 'admin', 99.00),
 ('jubair.admin@gmail.com', 'admin1234', 'Jubair', 11, 'admin', 0.00),
 ('amit.admin@gmail.com', 'admin1234', 'Amit', 12, 'admin', 0.00),
 ('zani.admin@gmail.com', 'admin1234', 'Zani', 13, 'admin', 0.00);
@@ -62,17 +62,45 @@ CREATE TABLE `service` (
   `email` varchar(256) NOT NULL,
   `deadline` date NOT NULL,
   `details` text NOT NULL,
-  `compensation` int(10) NOT NULL
+  `compensation` int(10) NOT NULL,
+  `status` varchar(256) NOT NULL,
+  `accept_count` int(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `service`
 --
 
-INSERT INTO `service` (`service_id`, `service_name`, `service_type`, `username`, `email`, `deadline`, `details`, `compensation`) VALUES
-(4, 'Service 1', 'request', 'Masud', 'masud@gmail.com', '2025-10-27', 'fdsfdsfdsfdsfdsds', 100),
-(5, 'Service 2', 'request', 'Masud', 'masud@gmail.com', '2025-10-27', 'fdsfsdf', 100),
-(6, 'Service 3', 'request', 'Gaus', 'gsmurady123@gmail.com', '2025-11-01', 'temp', 200);
+INSERT INTO `service` (`service_id`, `service_name`, `service_type`, `username`, `email`, `deadline`, `details`, `compensation`, `status`, `accept_count`) VALUES
+(4, 'Service 1', 'request', 'Masud', 'masud@gmail.com', '2025-10-27', 'fdsfdsfdsfdsfdsds', 100, '', 0),
+(5, 'Service 2', 'request', 'Masud', 'masud@gmail.com', '2025-10-27', 'fdsfsdf', 100, '', 0),
+(6, 'Service 3', 'request', 'Gaus', 'gsmurady123@gmail.com', '2025-11-01', 'temp', 200, '', 0),
+(7, 'Service 4', 'offer', 'Gaus', 'gsmurady123@gmail.com', '2025-11-01', 'unga bunga', 55, '', 0),
+(8, 'Service 4', 'offer', 'Gaus', 'gsmurady123@gmail.com', '2025-11-01', 'unga bunga', 55, '', 0),
+(9, 'Service 4', 'offer', 'Gaus', 'gsmurady123@gmail.com', '2025-11-01', 'unga bunga', 55, '', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `transactions`
+--
+
+CREATE TABLE `transactions` (
+  `transaction_id` int(50) NOT NULL,
+  `user_id` int(50) NOT NULL,
+  `amount` decimal(10,0) NOT NULL,
+  `report` varchar(256) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `transactions`
+--
+
+INSERT INTO `transactions` (`transaction_id`, `user_id`, `amount`, `report`) VALUES
+(2, 6, 99, 'Added to Balance'),
+(3, 0, 0, 'Deducted from Balance'),
+(4, 0, 55, 'Deducted from Balance'),
+(5, 6, 55, 'Deducted from Balance');
 
 --
 -- Indexes for dumped tables
@@ -91,6 +119,12 @@ ALTER TABLE `service`
   ADD PRIMARY KEY (`service_id`);
 
 --
+-- Indexes for table `transactions`
+--
+ALTER TABLE `transactions`
+  ADD PRIMARY KEY (`transaction_id`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -104,7 +138,13 @@ ALTER TABLE `account`
 -- AUTO_INCREMENT for table `service`
 --
 ALTER TABLE `service`
-  MODIFY `service_id` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `service_id` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT for table `transactions`
+--
+ALTER TABLE `transactions`
+  MODIFY `transaction_id` int(50) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

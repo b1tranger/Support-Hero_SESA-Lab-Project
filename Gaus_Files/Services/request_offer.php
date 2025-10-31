@@ -13,6 +13,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 $username = $_SESSION['username'];
 $email = $_SESSION['email'];
 $user_type = $_SESSION['user_type'];
+$user_id = $_SESSION['user_id'];
 
 include("../connection.php");
 
@@ -38,6 +39,8 @@ if (isset($_POST['submit'])) {
             $flag = 2; // Success
             $sqlUpdateBalance = "UPDATE account SET balance = balance - $compensation WHERE username = '$username' AND type = '$user_type'";
             $UpdateBalance = mysqli_query($conn, $sqlUpdateBalance);
+            $sqlTransaction = "Insert into transactions(user_id, amount, report) values('$user_id','$compensation','Deducted from Balance')";
+            $transactionSQL = mysqli_query($conn, $sqlTransaction);
         } else {
             $flag = 1; // Error
         }

@@ -11,6 +11,8 @@ body {
     overscroll-behavior: none;
 }
 
+
+
 /* Reusable container class */
 .container {
     max-width: 1200px;
@@ -563,6 +565,8 @@ body {
     /* Removes default paragraph margin */
     line-height: 1.5;
 }
+
+
 
 /* This is the responsive part you asked for */
 @media (min-width: 640px) {

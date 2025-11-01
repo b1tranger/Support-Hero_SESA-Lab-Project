@@ -24,6 +24,24 @@ if ($result) {
 } else {
     $Balance = 0;
 }
+// Profile Offers
+// $sql = "SELECT COUNT(service_id) AS total_service FROM service WHERE service_type='offer' and user_id='$user_id'";
+$result = mysqli_query($conn, $sql);
+if ($result) {
+    $row_2 = mysqli_fetch_assoc($result);
+    // $TotalOffers = $row_2['total_service'];
+} else {
+    $TotalOffers = 0;
+}
+// Profile Requests
+// $sql = "SELECT COUNT(service_id) AS total_service FROM service WHERE service_type='request' and user_id='$user_id'";
+$result = mysqli_query($conn, $sql);
+if ($result) {
+    $row_2 = mysqli_fetch_assoc($result);
+    // $TotalRequests = $row_2['total_service'];
+} else {
+    $TotalRequests = 0;
+}
 
 ?>
 <!DOCTYPE html>
@@ -50,16 +68,17 @@ if ($result) {
             <ul>
                 <li><a href="index.php">Go to Home Page</a></li>
 
-                <?php
-                if ($user_type == 'admin') {
-                    echo '<li><a href="admin.php">Dashboard</a></li>
-                    <li><a href="../Services/service.php">My Services</a></li>
-                <li><a href="my_tasks.php">My Tasks</a></li>
-                <li><a href="edit_profile.php">Edit Profile</a></li>
-                    
-                    ';
-                }
-                ?>
+                <?php if ($user_type == 'admin'): ?>
+                    <li><a href="admin.php">Dashboard</a></li>
+                    <li><a href="../Services/service.php"><?php echo $user_type; ?> Services</a></li>
+                    <li><a href="../Services/tasks.php"><?php echo $user_type; ?> Tasks</a></li>
+                    <!-- <li><a href="edit_profile.php">Edit Profile</a></li> -->
+                    <li><a href="../Services/feedback_admin.php">Feedbacks</a></li>
+                    <li><a href="../Services/comments.php">Comments</a></li>
+
+                <?php else: ?>
+                    <li><a href="../Services/feedback_user.php">Feedbacks</a></li>
+                <?php endif ?>
                 <li><a href="#"><?php echo $user_type; ?> Profile</a></li>
 
                 <li><a href="../Registration_Login/logout.php">Logout</a></li>
@@ -89,6 +108,15 @@ if ($result) {
                             <a href="#" class="metric-item">
                                 <p><?php echo $Balance; ?><br>Balance</p>
                             </a>
+                            <?php if ($user_type == 'provider'): ?>
+                                <a href="#" class="metric-item">
+                                    <p><?php echo '$TotalOffers'; ?><br> Offers Made</p>
+                                </a>
+                            <?php elseif ($user_type == 'consumer'): ?>
+                                <a href="#" class="metric-item">
+                                    <p><?php echo '$TotalRequests'; ?><br>Requests Made</p>
+                                </a>
+                            <?php endif ?>
 
                         </div>
                     </div>

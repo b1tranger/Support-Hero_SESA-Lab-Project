@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 31, 2025 at 07:04 PM
+-- Generation Time: Nov 01, 2025 at 10:20 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -51,6 +51,40 @@ INSERT INTO `account` (`email`, `password`, `username`, `user_id`, `type`, `bala
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `comments`
+--
+
+CREATE TABLE `comments` (
+  `username` varchar(256) NOT NULL,
+  `subject` varchar(256) NOT NULL,
+  `comment_text` text NOT NULL,
+  `date_posted` varchar(256) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `comments`
+--
+
+INSERT INTO `comments` (`username`, `subject`, `comment_text`, `date_posted`) VALUES
+('Gaus', 'Homepage Comment', 'hello', '2025-11-01 13:58:48');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `feedback`
+--
+
+CREATE TABLE `feedback` (
+  `user_id` int(50) NOT NULL,
+  `username` varchar(256) NOT NULL,
+  `subject` varchar(256) NOT NULL,
+  `message` text NOT NULL,
+  `date_submitted` varchar(256) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `service`
 --
 
@@ -78,6 +112,27 @@ INSERT INTO `service` (`service_id`, `service_name`, `service_type`, `username`,
 (7, 'Service 4', 'offer', 'Gaus', 'gsmurady123@gmail.com', '2025-11-01', 'unga bunga', 55, '', 0),
 (8, 'Service 4', 'offer', 'Gaus', 'gsmurady123@gmail.com', '2025-11-01', 'unga bunga', 55, '', 0),
 (9, 'Service 4', 'offer', 'Gaus', 'gsmurady123@gmail.com', '2025-11-01', 'unga bunga', 55, '', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tasks`
+--
+
+CREATE TABLE `tasks` (
+  `task_id` int(11) NOT NULL,
+  `task_text` text NOT NULL,
+  `is_completed` tinyint(1) NOT NULL DEFAULT 0,
+  `date_created` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tasks`
+--
+
+INSERT INTO `tasks` (`task_id`, `task_text`, `is_completed`, `date_created`) VALUES
+(1, 'check task list', 0, '2025-11-01 14:32:48'),
+(2, 'check task list #2', 0, '2025-11-01 14:33:01');
 
 -- --------------------------------------------------------
 
@@ -119,6 +174,12 @@ ALTER TABLE `service`
   ADD PRIMARY KEY (`service_id`);
 
 --
+-- Indexes for table `tasks`
+--
+ALTER TABLE `tasks`
+  ADD PRIMARY KEY (`task_id`);
+
+--
 -- Indexes for table `transactions`
 --
 ALTER TABLE `transactions`
@@ -139,6 +200,12 @@ ALTER TABLE `account`
 --
 ALTER TABLE `service`
   MODIFY `service_id` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT for table `tasks`
+--
+ALTER TABLE `tasks`
+  MODIFY `task_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `transactions`

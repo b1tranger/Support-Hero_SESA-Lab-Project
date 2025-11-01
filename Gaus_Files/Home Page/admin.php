@@ -74,6 +74,33 @@ if ($is_logged_in) {
     } else {
         $TotalOffers = 0;
     }
+    // Total Tasks
+    $sql = "SELECT COUNT(task_id) AS total_tasks FROM tasks";
+    $result = mysqli_query($conn, $sql);
+    if ($result) {
+        $row_2 = mysqli_fetch_assoc($result);
+        $TotalTasks = $row_2['total_tasks'];
+    } else {
+        $TotalTasks = 0;
+    }
+    // Total Feedback
+    $sql = "SELECT COUNT(user_id) AS total_feedback FROM feedback ";
+    $result = mysqli_query($conn, $sql);
+    if ($result) {
+        $row_2 = mysqli_fetch_assoc($result);
+        $TotalFeedback = $row_2['total_feedback'];
+    } else {
+        $TotalFeedback = 0;
+    }
+    // Total Comments
+    $sql = "SELECT COUNT(date_posted) AS total_comments FROM comments";
+    $result = mysqli_query($conn, $sql);
+    if ($result) {
+        $row_2 = mysqli_fetch_assoc($result);
+        $TotalComments = $row_2['total_comments'];
+    } else {
+        $TotalComments = 0;
+    }
 
 
     ?>
@@ -408,10 +435,13 @@ if ($is_logged_in) {
             <ul>
                 <li><a href="index.php">Go to Home Page</a></li>
                 <li><a href="#">Dashboard</a></li>
-                <li><a href="profile.php"><?php echo  $user_type; ?> Profile</a></li>
+                <li><a href="profile.php"><?php echo $user_type; ?> Profile</a></li>
+                <li><a href="users.php">User List</a></li>
                 <li><a href="../Services/service.php">Service List</a></li>
-                <li><a href="tasks.php">Tasks</a></li>
-                <li><a href="feedbacks.php">Feedbacks</a></li>
+                <li><a href="../Services/transactions.php">Transactions</a></li>
+                <li><a href="../Services/tasks.php">Tasks</a></li>
+                <li><a href="../Services/feedback_admin.php">Feedbacks</a></li>
+                <li><a href="../Services/comments.php">Comments</a></li>
                 <li><a href="../Registration_Login/logout.php">Logout</a></li>
             </ul>
         </nav>
@@ -422,7 +452,7 @@ if ($is_logged_in) {
 
                 <div class="dashboard-content">
                     <div class="admin-info-card">
-                        <h2><?php echo  $user_type; ?> Info:</h2>
+                        <h2><?php echo $user_type; ?> Info:</h2>
                         <p><strong>Name:</strong> <?php echo $username; ?></p>
                         <p><strong>ID:</strong> <?php echo $user_id; ?></p>
                         <p><strong>Email:</strong> <?php echo $user_email; ?></p>
@@ -433,28 +463,31 @@ if ($is_logged_in) {
                         <p class="overview-note">These will show counters (some are clickable for detail)</p>
 
                         <div class="metrics-grid">
-                            <a href="user_list.php" class="metric-item">
+                            <a href="users.php" class="metric-item">
                                 <p><?php echo $TotalUser; ?><br>Total Users</p>
                             </a>
-                            <div class="metric-item">
+                            <a href="../Services/transactions.php" class="metric-item">
                                 <p><?php echo $TotalBalance; ?><br>Total Balance</p>
-                            </div>
-                            <a href="service_list.php" class="metric-item">
+                            </a>
+                            <a href="../Services/service.php" class="metric-item">
                                 <p><?php echo $TotalServices; ?><br>Total Services</p>
                             </a>
-                            <a href="service_list.php?filter=request" class="metric-item">
+                            <a href="#" class="metric-item">
                                 <p><?php echo $TotalRequests; ?><br>Total Requests</p>
                             </a>
-                            <a href="service_list.php?filter=offer" class="metric-item">
+                            <a href="#" class="metric-item">
                                 <p><?php echo $TotalOffers; ?><br>Total Offers</p>
                             </a>
-                            <a href="tasks.php" class="metric-item">
-                                <p>?<br>Tasks</p>
+                            <a href="../Services/tasks.php" class="metric-item">
+                                <p><?php echo $TotalTasks; ?><br>Tasks</p>
                             </a>
-                            <a href="feedbacks.php" class="metric-item">
-                                <p>?<br>Feedbacks</p>
+                            <a href="../Services/feedback_admin.php" class="metric-item">
+                                <p><?php echo $TotalFeedback; ?><br>Feedbacks</p>
                             </a>
-                            <div class="metric-item">?</div>
+                            <a href="../Services/comments.php" class="metric-item">
+                                <p><?php echo $TotalComments; ?><br>Comments</p>
+                            </a>
+                            <!-- <div class="metric-item">?</div> -->
                         </div>
 
                         <p class="analysis-note">Based on Feedback and Analysis</p>

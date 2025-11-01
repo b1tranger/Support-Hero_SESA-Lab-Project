@@ -14,7 +14,38 @@ if ($is_logged_in) {
     $username = $_SESSION['username'];
     $user_type = $_SESSION['user_type'];
 } else {
-    $user_type = '';
+    $user_type = 'visitor';
+    $username = 'visitor';
+}
+
+
+// comments
+
+$comment_error = "";
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_comment'])) {
+    if ($is_logged_in) {
+        $comment_text = trim($_POST['comment_text']);
+        $comment_subject = "Homepage Comment"; // Default subject
+
+        if (!empty($comment_text)) {
+            // Prepare and bind
+            $stmt = $conn->prepare("INSERT INTO comments (username, subject, comment_text, date_posted) VALUES (?, ?, ?, NOW())");
+            $stmt->bind_param("sss", $username, $comment_subject, $comment_text);
+
+            if ($stmt->execute()) {
+                // Redirect to prevent form resubmission
+                header("Location: index.php#comments");
+                exit;
+            } else {
+                $comment_error = "Error: Could not post comment.";
+            }
+            $stmt->close();
+        } else {
+            $comment_error = "Comment cannot be empty.";
+        }
+    } else {
+        $comment_error = "You must be logged in to comment.";
+    }
 }
 ?>
 
@@ -31,6 +62,60 @@ if ($is_logged_in) {
     <!-- <link rel="stylesheet" type="text/css" href="index.css"> -->
     <link rel="stylesheet" type="text/css" href="../style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        .comment-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            text-align: left;
+        }
+
+        .comment-form textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            /* Slightly darker border */
+            border-radius: 0.5rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            line-height: 1.6;
+            box-sizing: border-box;
+            /* Ensures padding doesn't break layout */
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .comment-form textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+
+        .comment-form button {
+            align-self: flex-start;
+            /* Button doesn't stretch full-width */
+        }
+
+        /* Style for the comment text in the list */
+        .comment-text-content {
+            font-size: 1rem;
+            color: #1f2937;
+            line-height: 1.6;
+            margin-top: 0.5rem;
+            margin-bottom: 0.25rem;
+            /* This is key for showing newlines entered by user */
+            white-space: pre-wrap;
+            /* Ensures long text wraps */
+            word-break: break-word;
+        }
+    </style>
 
 </head>
 
@@ -76,11 +161,15 @@ if ($is_logged_in) {
     <!-- Sticky Header -->
     <header id="sticky-header" class="sticky-header">
         <div class="container">
-            <?php if ($is_logged_in): ?>
-                <!-- MODIFIED: Show this if user is logged in -->
-                <?php if ($user_type == 'admin') {
-                    echo '<a href="admin.php" class="btn btn-blue" style="margin-right:auto;">Go to Dashboard</a>';
-                } ?>
+            <?php if ($user_type == 'admin'): ?>
+                <a href="admin.php" class="btn btn-blue" style="margin-right:auto;">Go to Dashboard</a>
+
+                <span class="welcome-text">Welcome <?php echo $user_type; ?>, <?php echo $username; ?>!</span>
+
+                <a href="../Registration_Login/logout.php" class="btn btn-red">Logout</a>
+            <?php elseif ($user_type == 'provider' || $user_type == 'consumer'): ?>
+                <a href="profile.php" class="btn btn-blue" style="margin-right:auto;">Go to Profile</a>
+
                 <span class="welcome-text">Welcome <?php echo $user_type; ?>, <?php echo $username; ?>!</span>
 
                 <a href="../Registration_Login/logout.php" class="btn btn-red">Logout</a>
@@ -331,7 +420,7 @@ if ($is_logged_in) {
                         <div class="service-info" style="margin-right: 0;"> 
                         <h3>' . $amount . ' BDT Transferred</h3>
                                 <p><strong>From:</strong> ' . $sender . ' | <strong>To:</strong> ' . $receiver . '</p>
-                                <p><strong>Summary:</strong> ' . $report. ' | <strong>Date:</strong> ' . $date . '</p>
+                                <p><strong>Summary:</strong> ' . $report . ' | <strong>Date:</strong> ' . $date . '</p>
                             </div>
                             
                         </div>
@@ -347,6 +436,66 @@ if ($is_logged_in) {
 
                 <div style="margin-top: 2.5rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;">
                     <a href="../Services/transactions.php" class="btn btn-green">See Full List</a>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Comments -->
+
+        <section id="comments" class="full-screen-section">
+            <div class="section-content">
+                <h2>Recent Comments</h2>
+
+                <?php if ($is_logged_in): ?>
+                    <form action="index.php#comments" method="POST" class="comment-form">
+                        <label for="comment_text" style="display:none;">Your Comment</label>
+                        <textarea id="comment_text" name="comment_text" rows="4"
+                            placeholder="Write your comment, <?php echo htmlspecialchars($username); ?>..."
+                            required></textarea>
+                        <?php if ($comment_error): ?>
+                            <p style="color: red;"><?php echo $comment_error; ?></p>
+                        <?php endif; ?>
+                        <button type="submit" name="submit_comment" class="btn btn-blue">Post Comment</button>
+                    </form>
+                <?php else: ?>
+                    <p style="font-size: 1.125rem; margin-bottom: 2rem;">
+                        You must be <a href="../Registration_Login/login.php"
+                            style="color: #2563eb; text-decoration: underline;">logged in</a> to post a comment.
+                    </p>
+                <?php endif; ?>
+
+                <?php
+                // Fetch last 5 comments
+                $sql_comments = "SELECT username, comment_text, date_posted FROM comments ORDER BY date_posted DESC LIMIT 5";
+                $result_comments = mysqli_query($conn, $sql_comments);
+                ?>
+
+                <div class="service-list-container">
+                    <?php
+                    if (mysqli_num_rows($result_comments) > 0) {
+                        while ($row = mysqli_fetch_assoc($result_comments)) {
+                            $comment_user = htmlspecialchars($row['username']);
+                            $comment_text = htmlspecialchars($row['comment_text']);
+                            $comment_date = htmlspecialchars(date("d M, Y, g:i a", strtotime($row['date_posted'])));
+
+                            echo '
+                            <div class="service-list-item">
+                                <div class="service-info" style="margin-right: 0;">
+                                    <h3>' . $comment_user . ' <span style="font-weight: 400; font-size: 0.875rem; color: #6b7280;">' . $comment_date . '</span></h3>
+                                    <p class="comment-text-content">' . $comment_text . '</p>
+                                </div>
+                            </div>
+                            ';
+                        }
+                    } else {
+                        echo '<p style="padding: 2rem; text-align: center; color: #6b7280;">No comments yet. Be the first to post!</p>';
+                    }
+                    ?>
+                </div>
+
+                <div style="margin-top: 2.5rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;">
+                    <a href="../Services/comment.php" class="btn btn-green">See All Comments</a>
                 </div>
 
             </div>

@@ -4,8 +4,15 @@ include("../connection.php"); // Make sure this path is correct
 
 // Check if user is logged in (optional, but good practice)
 $is_logged_in = isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true;
-$user_type = $_SESSION['user_type'];
-// $username = $_SESSION['username'];
+
+if ($is_logged_in) {
+    // Grab user info if they are logged in
+    $username = $_SESSION['username'];
+    $user_type = $_SESSION['user_type'];
+} else {
+    $user_type = 'visitor';
+    $username = 'visitor';
+}
 
 // Fetch all comments, newest first
 $sql = "SELECT * FROM comments ORDER BY date_posted DESC";

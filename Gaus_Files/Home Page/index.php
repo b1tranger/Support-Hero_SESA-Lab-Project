@@ -316,12 +316,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_comment'])) {
                 <div style="margin-top: 2.5rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;">
                     <?php if ($is_logged_in): ?>
                         <a href="../Services/request_offer.php" class="btn btn-blue">Create a Service</a>
+                        <a href="../Services/service.php" class="btn btn-green">See Full list</a>
                     <?php else: ?>
                         <a href="../Registration_Login/login.php" class="btn btn-blue">Log in to Create
                             Service</a>
+                        <a href="../Registration_Login/login.php" class="btn btn-green">Log in to see Full list</a>
 
                     <?php endif; ?>
-                    <a href="../Services/service.php" class="btn btn-green">See Full list</a>
+
 
                 </div>
 
@@ -434,10 +436,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_comment'])) {
 
                 </div>
 
-                <div style="margin-top: 2.5rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;">
-                    <a href="../Services/transactions.php" class="btn btn-green">See Full List</a>
-                </div>
-
+                <?php if ($user_type == 'admin' || $user_type == 'provider' || $user_type == 'consumer'): ?>
+                    <div style="margin-top: 2.5rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;">
+                        <a href="../Services/transactions.php" class="btn btn-green">See Full List</a>
+                    </div>
+                <?php else: ?>
+                    <div style="margin-top: 2.5rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;">
+                        <a href="../Registration_Login/login.php" class="btn btn-green">Log in to see Full List</a>
+                    </div>
+                <?php endif ?>
             </div>
         </section>
 
@@ -445,25 +452,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_comment'])) {
 
         <section id="comments" class="full-screen-section">
             <div class="section-content">
-                <h2>Recent Comments</h2>
+                <h2>Post a Comment</h2>
 
-                <?php if ($is_logged_in): ?>
+                
                     <form action="index.php#comments" method="POST" class="comment-form">
                         <label for="comment_text" style="display:none;">Your Comment</label>
                         <textarea id="comment_text" name="comment_text" rows="4"
-                            placeholder="Write your comment, <?php echo htmlspecialchars($username); ?>..."
+                            placeholder="Write your comment, <?php echo htmlspecialchars($user_type); ?>..."
                             required></textarea>
                         <?php if ($comment_error): ?>
                             <p style="color: red;"><?php echo $comment_error; ?></p>
                         <?php endif; ?>
                         <button type="submit" name="submit_comment" class="btn btn-blue">Post Comment</button>
                     </form>
-                <?php else: ?>
-                    <p style="font-size: 1.125rem; margin-bottom: 2rem;">
-                        You must be <a href="../Registration_Login/login.php"
-                            style="color: #2563eb; text-decoration: underline;">logged in</a> to post a comment.
-                    </p>
-                <?php endif; ?>
+              
 
                 <?php
                 // Fetch last 5 comments
@@ -494,10 +496,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_comment'])) {
                     ?>
                 </div>
 
+
                 <div style="margin-top: 2.5rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;">
-                    <a href="../Services/comment.php" class="btn btn-green">See All Comments</a>
+                    <a href="../Services/comments.php" class="btn btn-green">See All Comments</a>
                 </div>
 
+                
+  
+   
+
+    
             </div>
         </section>
 

@@ -11,9 +11,9 @@
 <body>
     <?php include 'data.php'; ?>
     <div class="dashboard-container">
-        <?php include 'partials/sidebar.php'; ?>
+        <?php include 'sidebar.php'; ?>
         <main class="main-content">
-            <?php $page_title = 'Dashboard Overview'; include 'partials/header.php'; ?>
+            <?php $page_title = 'Dashboard Overview'; include 'header.php'; ?>
             
             <section class="dashboard-cards">
                 <?php foreach ($dashboard_metrics as $key => $metric): ?>
@@ -46,4 +46,5 @@
     
     <script src="script.js"></script>
 </body>
+
 </html>

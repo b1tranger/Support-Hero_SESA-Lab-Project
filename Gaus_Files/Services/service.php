@@ -4,10 +4,18 @@ include("../connection.php");
 
 
 $is_logged_in = isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true;
-$user_type = $_SESSION['user_type'];
-$username = $_SESSION['username'];
 
-$sql = "SELECT * FROM service ORDER BY deadline ASC";
+// Set user variables, with defaults for visitors
+$user_type = $_SESSION['user_type'] ?? 'visitor';
+$username = $_SESSION['username'] ?? 'visitor';
+
+// MODIFIED SQL: Select worker_limit and clean up the status
+$sql = "SELECT service_id, service_name, details, service_type, username, deadline, compensation, 
+               IF(status = '' OR status IS NULL, 'pending', status) as status, 
+               accept_count, worker_limit 
+        FROM service 
+        ORDER BY deadline ASC";
+
 $result = mysqli_query($conn, $sql);
 
 ?>
@@ -19,7 +27,6 @@ $result = mysqli_query($conn, $sql);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Full Service List</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- Link to the new CSS file -->
     <link rel="stylesheet" href="service.css">
 </head>
 
@@ -32,8 +39,6 @@ $result = mysqli_query($conn, $sql);
             <?php if ($user_type == 'admin'): ?>
                 <a href="../Home_Page/admin.php" class="btn btn-back">Back to Dashboard</a>
             <?php endif ?>
-
-
         </header>
 
         <main class="service-grid">
@@ -49,30 +54,44 @@ $result = mysqli_query($conn, $sql);
                     $service_poster = htmlspecialchars($row['username']); // The user who posted it
                     $deadline = htmlspecialchars(date("d M, Y", strtotime($row['deadline'])));
                     $compensation = htmlspecialchars($row['compensation']);
-                    $status = htmlspecialchars($row['status']); // 'pending', 'in_progress', 'completed'
+
+                    $status = htmlspecialchars($row['status']);
                     $accept_count = (int) $row['accept_count'];
+                    $worker_limit = (int) $row['worker_limit'];
+                    if ($worker_limit <= 0)
+                        $worker_limit = 1;
 
-                    // --- Button Visibility Logic (Simplified as requested) ---
+                    // --- NEW ROLE-BASED BUTTON LOGIC ---
             
-                    // 1. "Accept" button
-                    $can_accept = false;
-                    if ($user_type == 'provider' || $user_type == 'admin') {
-                        // Shows 'Accept' if user is a provider or admin, regardless of service status
-                        $can_accept = true;
-                    }
+                    $show_accept_button = false;
+                    $show_complete_button = false;
 
-                    // 2. "Completed" button
-                    $can_complete = false;
-                    // ASSUMING the other user type is 'consumer'.
-                    // You might need to change 'consumer' to whatever your user type is for regular users.
-                    if ($user_type == 'consumer' || $user_type == 'admin') {
-                        // Shows 'Completed' if user is a consumer or admin, regardless of service status
-                        $can_complete = true;
+                    if ($status == 'pending') {
+                        // Logic for "Accept" button (only shows on 'pending' services)
+                        if ($user_type == 'provider' && $service_type == 'request' && $username != $service_poster) {
+                            // Provider can accept a REQUEST they didn't post
+                            $show_accept_button = true;
+                        } else if ($user_type == 'consumer' && $service_type == 'offer' && $username != $service_poster) {
+                            // Consumer can accept an OFFER they didn't post
+                            $show_accept_button = true;
+                        }
+                        // Admin cannot accept anything
+            
+                    } else if ($status == 'in_progress') {
+                        // Logic for "Complete" button (only shows on 'in_progress' services)
+                        if ($user_type == 'admin') {
+                            // Admin can complete ANY service
+                            $show_complete_button = true;
+                        } else if ($user_type == 'provider' && $service_type == 'offer' && $username == $service_poster) {
+                            // Provider can complete their OWN OFFER
+                            $show_complete_button = true;
+                        } else if ($user_type == 'consumer' && $service_type == 'request' && $username == $service_poster) {
+                            // Consumer can complete their OWN REQUEST
+                            $show_complete_button = true;
+                        }
                     }
-
                     // --- End of new logic ---
             
-                    // Admin-only: Show all services.
                     // Non-admins: Hide completed services.
                     if ($status == 'completed' && $user_type != 'admin') {
                         continue; // Skip this item
@@ -83,14 +102,14 @@ $result = mysqli_query($conn, $sql);
                     <div class="service-card" id="service-<?php echo $service_id; ?>">
                         <div class="card-header">
                             <h3><?php echo $service_name; ?></h3>
-                            <!-- Status Indicator -->
                             <span class="status-indicator status-<?php echo $status; ?>"
-                                title="Status: <?php echo ucfirst($status); ?>">
-                                <?php echo ucfirst($status); ?>
+                                title="Status: <?php echo ucfirst(str_replace('_', ' ', $status)); ?>">
+                                <?php echo ucfirst(str_replace('_', ' ', $status)); ?>
                             </span>
                         </div>
                         <div class="card-body">
-                            <p class="service-meta">
+                            <p class="service-meta" data-poster="<?php echo $service_poster; ?>"
+                                data-service-type="<?php echo $service_type; ?>">
                                 <strong>Posted by:</strong> <?php echo $service_poster; ?> |
                                 <strong>Type:</strong> <?php echo ucfirst($service_type); ?>
                             </p>
@@ -101,15 +120,14 @@ $result = mysqli_query($conn, $sql);
                             <p class="service-details"><?php echo $service_desc; ?></p>
                         </div>
                         <div class="card-actions">
-                            <?php if ($can_accept): ?>
-                                <!-- "Accept" button with click counter display -->
+                            <?php if ($show_accept_button): ?>
                                 <button class="btn btn-accept" data-service-id="<?php echo $service_id; ?>">
-                                    Accept (<span class="accept-count"><?php echo $accept_count; ?></span>)
+                                    Accept (<span
+                                        class="accept-count"><?php echo $accept_count; ?></span>/<?php echo $worker_limit; ?>)
                                 </button>
                             <?php endif; ?>
 
-                            <?php if ($can_complete): ?>
-                                <!-- "Completed" button -->
+                            <?php if ($show_complete_button): ?>
                                 <button class="btn btn-complete" data-service-id="<?php echo $service_id; ?>">
                                     Mark as Completed
                                 </button>
@@ -126,46 +144,74 @@ $result = mysqli_query($conn, $sql);
         </main>
     </div>
 
+    <!-- UPDATED JAVASCRIPT -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const grid = document.querySelector('.service-grid');
 
+            const currentUser = '<?php echo $username; ?>';
+            const userType = '<?php echo $user_type; ?>';
+
+            async function sendServiceUpdate(action, serviceId) {
+                const formData = new FormData();
+                formData.append('action', action);
+                formData.append('service_id', serviceId);
+
+                try {
+                    const response = await fetch('update_service.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    return await response.json();
+                } catch (error) {
+                    console.error('Network Error:', error);
+                    return { success: false, message: 'Network error. Please try again.' };
+                }
+            }
+
             grid.addEventListener('click', async (e) => {
-                // --- Handle "Accept" Button Click ---
+
+                // Handle "Accept" Button Click
                 if (e.target.classList.contains('btn-accept')) {
                     const button = e.target;
                     const serviceId = button.dataset.serviceId;
+                    button.disabled = true;
 
-                    // Send data to the backend
-                    const formData = new FormData();
-                    formData.append('action', 'accept');
-                    formData.append('service_id', serviceId);
+                    const result = await sendServiceUpdate('accept', serviceId);
 
-                    try {
-                        const response = await fetch('update_service.php', {
-                            method: 'POST',
-                            body: formData
-                        });
-                        const result = await response.json();
+                    if (result.success) {
+                        const card = document.getElementById(`service-${serviceId}`);
+                        const countSpan = button.querySelector('.accept-count');
+                        const statusSpan = card.querySelector('.status-indicator');
 
-                        if (result.success) {
-                            // Update UI
-                            const card = document.getElementById(`service-${serviceId}`);
-                            const countSpan = button.querySelector('.accept-count');
-                            const statusSpan = card.querySelector('.status-indicator');
-
-                            // Update click counter
+                        if (countSpan) {
                             countSpan.textContent = result.new_count;
+                        }
 
-                            // Update status
+                        if (result.new_status === 'in_progress') {
                             statusSpan.textContent = 'In Progress';
                             statusSpan.classList.remove('status-pending');
                             statusSpan.classList.add('status-in_progress');
 
-                            // Hide this button and show "Completed" button (if logic allows)
-                            button.style.display = 'none';
-                            <?php if ($user_type == 'provider' || $user_type == 'admin'): ?>
-                                // Dynamically create and show "Completed" button
+                            button.style.display = 'none'; // Hide "Accept" button
+
+                            // --- Dynamically add "Complete" button if needed ---
+                            const posterMeta = card.querySelector('.service-meta[data-poster]');
+                            const posterName = posterMeta ? posterMeta.dataset.poster : '';
+                            const serviceType = posterMeta ? posterMeta.dataset.serviceType : '';
+
+                            let showDynamicComplete = false;
+                            if (userType === 'admin') {
+                                showDynamicComplete = true;
+                            } else if (userType === 'consumer' && serviceType === 'request' && currentUser === posterName) {
+                                // Consumer who posted the request can complete it
+                                showDynamicComplete = true;
+                            } else if (userType === 'provider' && serviceType === 'offer' && currentUser === posterName) {
+                                // Provider who posted the offer can complete it
+                                showDynamicComplete = true;
+                            }
+
+                            if (showDynamicComplete) {
                                 const completeBtn = card.querySelector('.btn-complete');
                                 if (!completeBtn) {
                                     const newCompleteBtn = document.createElement('button');
@@ -174,13 +220,14 @@ $result = mysqli_query($conn, $sql);
                                     newCompleteBtn.textContent = 'Mark as Completed';
                                     card.querySelector('.card-actions').appendChild(newCompleteBtn);
                                 }
-                            <?php endif; ?>
-
+                            }
                         } else {
-                            console.error('Failed to accept:', result.message);
+                            button.disabled = false;
                         }
-                    } catch (error) {
-                        console.error('Error:', error);
+
+                    } else {
+                        alert('Error: ' + result.message);
+                        button.disabled = false;
                     }
                 }
 
@@ -188,41 +235,28 @@ $result = mysqli_query($conn, $sql);
                 if (e.target.classList.contains('btn-complete')) {
                     const button = e.target;
                     const serviceId = button.dataset.serviceId;
+                    button.disabled = true;
 
-                    // Send data to the backend
-                    const formData = new FormData();
-                    formData.append('action', 'complete');
-                    formData.append('service_id', serviceId);
+                    const result = await sendServiceUpdate('complete', serviceId);
 
-                    try {
-                        const response = await fetch('update_service.php', {
-                            method: 'POST',
-                            body: formData
-                        });
-                        const result = await response.json();
+                    if (result.success) {
+                        const card = document.getElementById(`service-${serviceId}`);
 
-                        if (result.success) {
-                            // Update UI
-                            const card = document.getElementById(`service-${serviceId}`);
-
-                            <?php if ($user_type == 'admin'): ?>
-                                // Admin sees status change
-                                const statusSpan = card.querySelector('.status-indicator');
-                                statusSpan.textContent = 'Completed';
-                                statusSpan.classList.remove('status-in_progress');
-                                statusSpan.classList.add('status-completed');
-                                card.querySelector('.card-actions').innerHTML = ''; // Clear buttons
-                            <?php else: ?>
-                                // Regular users just see the card disappear
-                                card.style.opacity = '0';
-                                setTimeout(() => card.remove(), 300);
-                            <?php endif; ?>
-
+                        if (userType === 'admin') {
+                            const statusSpan = card.querySelector('.status-indicator');
+                            statusSpan.textContent = 'Completed';
+                            statusSpan.classList.remove('status-in_progress');
+                            statusSpan.classList.add('status-completed');
+                            card.querySelector('.card-actions').innerHTML = '';
                         } else {
-                            console.error('Failed to complete:', result.message);
+                            // Regular users (provider/consumer) see the card disappear
+                            card.style.opacity = '0';
+                            setTimeout(() => card.remove(), 350);
                         }
-                    } catch (error) {
-                        console.error('Error:', error);
+
+                    } else {
+                        alert('Error: ' + result.message);
+                        button.disabled = false;
                     }
                 }
             });

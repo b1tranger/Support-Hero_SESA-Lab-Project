@@ -1,47 +1,104 @@
 <?php
 session_start();
 
+// 1. REQUIRE LOGIN
 // Check if the user is logged in. If not, redirect to login page.
-// Make sure the path to login.php is correct from this file's location.
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header("location: ../Registration_Login/login.php");
     exit;
 }
 
-// If the script continues, the user is logged in.
-// You can now safely use their session data.
+// 2. GET SESSION DATA
 $username = $_SESSION['username'];
 $email = $_SESSION['email'];
-$user_type = $_SESSION['user_type'];
+$user_type = $_SESSION['user_type']; // 'consumer' or 'provider'
 $user_id = $_SESSION['user_id'];
 
 include("../connection.php");
 
 $flag = 0; // 0=idle, 1=error, 2=success
 
+// 3. SET SERVICE TYPE BASED ON USER ROLE
+$service_type_value = '';
+$service_type_display = '';
+$compensation_label = 'Compensation (BDT):';
+
+if ($user_type == 'consumer') {
+    $service_type_value = 'request';
+    $service_type_display = 'I am Requesting this';
+    $compensation_label = 'Compensation/Bounty (Will be deducted from your balance):';
+} else if ($user_type == 'provider') {
+    $service_type_value = 'offer';
+    $service_type_display = 'I am Offering this';
+    $compensation_label = 'Service Price (What you will be paid):';
+} else if ($user_type == 'admin') {
+    // Admin case (defaulting to 'request', but you can change this)
+    $service_type_value = 'request';
+    $service_type_display = 'Posting as Admin (Request)';
+    $compensation_label = 'Compensation/Bounty (Admin Post):';
+}
+
+
+// 4. HANDLE FORM SUBMISSION
 if (isset($_POST['submit'])) {
+
+    // Get all form data
     $service_name = trim($_POST['service_name']);
-    $service_type = $_POST['service_type'];
-    // Use session username/email if available, otherwise use the form's input
-    $username = isset($_SESSION['username']) ? $_SESSION['username'] : trim($_POST['input_name']);
-    $email = isset($_SESSION['email']) ? $_SESSION['email'] : trim($_POST['input_email']);
+    $service_type = $_POST['service_type']; // from hidden input
     $deadline = trim($_POST['deadline']);
     $details = $_POST['details'];
+    $compensation = (int) trim($_POST['compensation']);
+    $worker_limit = (int) trim($_POST['worker_limit']);
+    $status_default = 'incomplete'; // As requested in your SQL
 
-    $compensation = trim($_POST['compensation']);
-
-    if (empty($service_name) || empty($service_type) || empty($username) || empty($email) || empty($deadline) || empty($details)) {
+    // Validate inputs
+    if (empty($service_name) || empty($service_type) || empty($deadline) || empty($details) || $compensation < 0 || $worker_limit <= 0) {
         $flag = 1; // Error
     } else {
-        // passing to the Database
-        $sql = "insert into service(service_name,service_type, username, email, deadline, details,compensation) values('$service_name','$service_type','$username','$email','$deadline','$details', '$compensation')";
-        $result = mysqli_query($conn, $sql);
-        if ($result) {
+
+        // 5. USE PREPARED STATEMENT (Prevents SQL Injection)
+        $sql = "INSERT INTO service (service_name, service_type, username, email, deadline, details, compensation, status, worker_limit) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        $stmt = $conn->prepare($sql);
+        // s = string, i = integer
+        $stmt->bind_param(
+            "ssssssisi",
+            $service_name,
+            $service_type,
+            $username,
+            $email,
+            $deadline,
+            $details,
+            $compensation,
+            $status_default,
+            $worker_limit
+        );
+
+        // 6. EXECUTE AND UPDATE BALANCE (IF NEEDED)
+        if ($stmt->execute()) {
             $flag = 2; // Success
-            $sqlUpdateBalance = "UPDATE account SET balance = balance - $compensation WHERE username = '$username' AND type = '$user_type'";
-            $UpdateBalance = mysqli_query($conn, $sqlUpdateBalance);
-            $sqlTransaction = "Insert into transactions(user_id, amount, report) values('$user_id','$compensation','Deducted from Balance')";
-            $transactionSQL = mysqli_query($conn, $sqlTransaction);
+
+            // --- FIXED LOGIC ---
+            // Only deduct balance if the user is a 'consumer' posting a 'request'
+            if ($service_type == 'request' && $user_type == 'consumer' && $compensation > 0) {
+
+                // Deduct from balance
+                $sqlUpdateBalance = "UPDATE account SET balance = balance - ? WHERE user_id = ?";
+                $stmt_balance = $conn->prepare($sqlUpdateBalance);
+                $stmt_balance->bind_param("ii", $compensation, $user_id);
+                $stmt_balance->execute();
+
+                // Create transaction record
+                $sqlTransaction = "INSERT INTO transactions(user_id, amount, report) VALUES (?, ?, ?)";
+                $stmt_trans = $conn->prepare($sqlTransaction);
+                $report = "Funded service: " . substr($service_name, 0, 50);
+                $neg_compensation = -$compensation; // Store as negative for a withdrawal
+
+                $stmt_trans->bind_param("ids", $user_id, $neg_compensation, $report);
+                $stmt_trans->execute();
+            }
+
         } else {
             $flag = 1; // Error
         }
@@ -56,7 +113,9 @@ if (isset($_POST['submit'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Service - Support Hero</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css"> <!-- Linking to your main style.css -->
 
+    <!-- Using styles from your original file -->
     <style>
         body {
             margin: 0;
@@ -101,7 +160,6 @@ if (isset($_POST['submit'])) {
 
         input[type="text"],
         input[type="email"],
-        input[type="password"],
         input[type="number"],
         input[type="date"],
         select,
@@ -118,16 +176,19 @@ if (isset($_POST['submit'])) {
             transition: border-color 0.3s, box-shadow 0.3s;
         }
 
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        input[type="password"]:focus,
-        input[type="number"]:focus,
-        input[type="date"]:focus,
+        input:focus,
         select:focus,
         textarea:focus {
             outline: none;
             border-color: #2563eb;
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Style for readonly inputs */
+        input[readonly] {
+            background-color: #555;
+            cursor: not-allowed;
+            color: #ccc;
         }
 
         textarea {
@@ -136,8 +197,9 @@ if (isset($_POST['submit'])) {
         }
 
         .input-hint {
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             color: #999;
+            margin-top: 0.25rem;
         }
 
         input[type="submit"] {
@@ -160,11 +222,9 @@ if (isset($_POST['submit'])) {
         a {
             color: #60a5fa;
             text-decoration: none;
-            transition: color 0.3s ease;
         }
 
         a:hover {
-            color: #93c5fd;
             text-decoration: underline;
         }
 
@@ -174,55 +234,38 @@ if (isset($_POST['submit'])) {
             margin-top: 1.5rem;
             border-top: 1px solid #444;
         }
-
-        .form-message h3 {
-            font-size: 1.5rem;
-            margin: 0 0 1rem 0;
-            color: #ffffff;
-        }
-
-        .form-message p {
-            margin-bottom: 1rem;
-        }
     </style>
 </head>
 
 <body>
     <div class="form-container">
-        <div class="back-link-container">
-            <a href="../Home_Page/index.php" class="btn-back">
-                &larr; Go to Homepage
-            </a>
-            <br><br><br><br>
-        </div>
+
+        <!-- Back Link (using your btn styles) -->
+        <a href="../Home_Page/index.php" class="btn btn-back"
+            style="background-color: #444; color: #f0f0f0; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; margin-bottom: 2rem; display: inline-block;">
+            &larr; Go to Homepage
+        </a>
+
         <?php if ($flag == 0) { // Show form if idle ?>
             <form method="POST" class="form">
-                <h2 style="text-align: center;">Request a Service</h2>
+
+                <!-- Title changes based on user type -->
+                <h2><?php echo ($service_type_value == 'request') ? 'Request a Service' : 'Offer a Service'; ?></h2>
 
                 <div class="form-group">
                     <label for="service_name">Service Name:</label>
                     <input id="service_name" name="service_name" type="text" placeholder="e.g., 'Website Design'" required>
                 </div>
 
+                <!-- NEW: Readonly Service Type -->
                 <div class="form-group">
-                    <label for="service_type">Service Type:</label>
-                    <select id="service_type" name="service_type" required>
-                        <option value="">--Select Type--</option>
-                        <option value="request">I am Requesting this</option>
-                        <option value="offer">I am Offering this</option>
-                    </select>
+                    <label for="service_type_display">Service Type:</label>
+                    <!-- This hidden field sends the actual value -->
+                    <input type="hidden" name="service_type" value="<?php echo $service_type_value; ?>">
+                    <!-- This field just shows the user what is selected and is read-only -->
+                    <input id="service_type_display" name="service_type_display" type="text"
+                        value="<?php echo $service_type_display; ?>" readonly>
                 </div>
-
-                <?php if (!isset($_SESSION['loggedin'])) { ?>
-                    <div class="form-group">
-                        <label for="input_name">Your Username:</label>
-                        <input id="input_name" name="input_name" type="text" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="input_email">Your Email:</label>
-                        <input id="input_email" name="input_email" type="email" required>
-                    </div>
-                <?php } ?>
 
                 <div class="form-group">
                     <label for="deadline">Deadline/Uptime:</label>
@@ -235,13 +278,22 @@ if (isset($_POST['submit'])) {
                         required></textarea>
                 </div>
 
+                <!-- Label changes based on user type -->
                 <div class="form-group">
-                    <label for="compensation">Compensation/Bounty (Will be deducted from balance):</label>
-                    <input id="compensation" name="compensation" type="number" placeholder="e.g., 5000">
+                    <label for="compensation"><?php echo $compensation_label; ?></label>
+                    <input id="compensation" name="compensation" type="number" placeholder="e.g., 5000" min="0" required>
+                </div>
+
+                <!-- NEW: Worker Limit Field -->
+                <div class="form-group">
+                    <label for="worker_limit">Worker Limit:</label>
+                    <input id="worker_limit" name="worker_limit" type="number" value="1" min="1" required>
+                    <p class="input-hint">Set to 1 for a single-person job. More than 1 allows multiple accepts.</p>
                 </div>
 
                 <div class="form-group">
-                    <input type="submit" name="submit" value="Submit Request/Offer">
+                    <!-- Button text changes based on user type -->
+                    <input type="submit" name="submit" value="Submit <?php echo ucfirst($service_type_value); ?>">
                 </div>
             </form>
 
@@ -253,7 +305,7 @@ if (isset($_POST['submit'])) {
                     <p>Your service has been posted.</p>
                 <?php } else if ($flag == 1) { ?>
                         <h3>Error</h3>
-                        <p>Please fill out all fields correctly.</p>
+                        <p>Please fill out all fields correctly. Ensure compensation and worker limit are valid numbers.</p>
                 <?php } ?>
                 <p><a href="../Home_Page/index.php#services">Go back to Services</a></p>
                 <p><a href="request_offer.php">Post another service</a></p>

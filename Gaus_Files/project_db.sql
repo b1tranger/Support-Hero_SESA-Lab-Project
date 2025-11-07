@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 01, 2025 at 10:20 AM
+-- Generation Time: Nov 07, 2025 at 05:11 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -98,20 +98,21 @@ CREATE TABLE `service` (
   `details` text NOT NULL,
   `compensation` int(10) NOT NULL,
   `status` varchar(256) NOT NULL,
-  `accept_count` int(100) NOT NULL
+  `accept_count` int(100) NOT NULL,
+  `worker_limit` int(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `service`
 --
 
-INSERT INTO `service` (`service_id`, `service_name`, `service_type`, `username`, `email`, `deadline`, `details`, `compensation`, `status`, `accept_count`) VALUES
-(4, 'Service 1', 'request', 'Masud', 'masud@gmail.com', '2025-10-27', 'fdsfdsfdsfdsfdsds', 100, '', 0),
-(5, 'Service 2', 'request', 'Masud', 'masud@gmail.com', '2025-10-27', 'fdsfsdf', 100, '', 0),
-(6, 'Service 3', 'request', 'Gaus', 'gsmurady123@gmail.com', '2025-11-01', 'temp', 200, '', 0),
-(7, 'Service 4', 'offer', 'Gaus', 'gsmurady123@gmail.com', '2025-11-01', 'unga bunga', 55, '', 0),
-(8, 'Service 4', 'offer', 'Gaus', 'gsmurady123@gmail.com', '2025-11-01', 'unga bunga', 55, '', 0),
-(9, 'Service 4', 'offer', 'Gaus', 'gsmurady123@gmail.com', '2025-11-01', 'unga bunga', 55, '', 0);
+INSERT INTO `service` (`service_id`, `service_name`, `service_type`, `username`, `email`, `deadline`, `details`, `compensation`, `status`, `accept_count`, `worker_limit`) VALUES
+(4, 'Service 1', 'request', 'Masud', 'masud@gmail.com', '2025-10-27', 'fdsfdsfdsfdsfdsds', 100, '', 0, 0),
+(5, 'Service 2', 'request', 'Masud', 'masud@gmail.com', '2025-10-27', 'fdsfsdf', 100, '', 0, 0),
+(6, 'Service 3', 'request', 'Gaus', 'gsmurady123@gmail.com', '2025-11-01', 'temp', 200, '', 0, 0),
+(7, 'Service 4', 'offer', 'Gaus', 'gsmurady123@gmail.com', '2025-11-01', 'unga bunga', 55, '', 0, 0),
+(8, 'Service 4', 'offer', 'Gaus', 'gsmurady123@gmail.com', '2025-11-01', 'unga bunga', 55, '', 0, 0),
+(9, 'Service 4', 'offer', 'Gaus', 'gsmurady123@gmail.com', '2025-11-01', 'unga bunga', 55, '', 0, 0);
 
 -- --------------------------------------------------------
 

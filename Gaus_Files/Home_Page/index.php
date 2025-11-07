@@ -232,8 +232,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_comment'])) {
                 <p>Support Hero is a platform designed to bridge the gap between consumers seeking services and
                     providers ready to offer them. Our unique model allows for direct compensation and community-driven
                     donations, creating a sustainable and supportive ecosystem.</p>
+                <a href="../Services/achievement.php" class="btn btn-blue" style="margin: 20px;">See Our Achievements</a>
                 <p>Whether you need help with daily tasks, professional services, or emergency support, our network of
                     vetted providers is here for you. Join us in building a stronger, more connected community.</p>
+
+                <br><br>
                 <h2>How It Works</h2>
                 <div class="grid-3">
                     <div class="card">
@@ -278,7 +281,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_comment'])) {
 
                 // MODIFIED: Updated SQL query to get all the new fields.
                 // I am ASSUMING your columns are named 'id', 'service_type', 'username', 'deadline', 'compensation'
-                $sql = "SELECT service_id, service_name, details, service_type, username, deadline, compensation FROM service LIMIT 6";
+                $sql = "SELECT service_id, service_name, details, service_type, username, deadline, compensation FROM service ORDER BY deadline ASC LIMIT 6";
                 $result = mysqli_query($conn, $sql);
                 ?>
 
@@ -313,10 +316,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_comment'])) {
                                 <p><strong>Compensation:</strong> ' . $compensation . ' | <strong>Deadline:</strong> ' . $deadline . '</p>
                                 <p class="service-desc-snippet">' . $details_snippet . '</p>
                             </div>
+                            ';
+                            if ($is_logged_in) {
+                                echo '
                             <div class="service-action">
                                 <a href="../Services/service_details.php?id=' . $service_id . '" class="btn btn-blue btn-small">View</a>
-                            </div>
-                        </div>
+                            </div>';
+                            }
+                            echo '</div>
                         ';
                         }
                     } else {

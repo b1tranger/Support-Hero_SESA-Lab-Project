@@ -1,6 +1,7 @@
 22.07.25
 # SESA-Lab-Project
 "Support Hero" is a community-driven platform where users can create and accept support services, donate transparently, and help build a network of trust and assistance.
+This is a Lab project for our Software Engineering and System Analysis Lab (CSE0613226).
 
 Faculty: [Sadia Jahan](https://uits.edu.bd/sadia-jahan/)
 
@@ -22,4 +23,3 @@ Submitted by	:
 - but to export it, open the database in XAMPP and use "Export" to export as a .sql file (or, ".sql.zip")
 - in the new location (in a different computer) create a new database, and use "Import" and select the .sql file or the .sql.zip to import the database files.
 
-# ornob dekhte chae
